@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Forecaster AI</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-body" style="display: flex; justify-content: center; align-items: center; min-height: 100vh;">
+
+    <div class="bg-glows">
+        <div class="glow-1"></div>
+        <div class="glow-2"></div>
+    </div>
+
+    <div class="login-container card">
+        <div class="login-header">
+            <div class="logo">
+                <i class="fa-solid fa-chart-line-up"></i>
+                <span>Forecaster AI</span>
+            </div>
+            <p>Welcome back! Please login to your account</p>
+        </div>
+
+        <form id="loginForm">
+            <!-- Email Input -->
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <div class="input-icon-wrapper">
+                    <i class="fa-regular fa-envelope"></i>
+                    <input type="email" id="email" placeholder="name@company.com" required>
+                </div>
+            </div>
+
+            <!-- Password Input -->
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-icon-wrapper">
+                    <i class="fa-regular fa-lock"></i>
+                    <input type="password" id="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div class="login-options">
+                <label class="remember-me">
+                    <input type="checkbox"> Remember me
+                </label>
+                <a href="#" class="forgot-pass">Forgot Password?</a>
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" class="btn-login">
+                <span>Sign In</span> <i class="fa-solid fa-arrow-right-to-bracket" style="margin-left: 8px;"></i>
+            </button>
+        </form>
+
+        <div class="login-footer-text">
+            Don't have an account? <a href="#">Create one free</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Redirect to dashboard.html on submit
+            window.location.href = 'dashboard.html';
+        });
+    </script>
+</body>
+</html>

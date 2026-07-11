@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Prediction & Budget AI Allocation Advisor</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="bg-glows">
+        <div class="glow-1"></div>
+        <div class="glow-2"></div>
+    </div>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-chart-line-up"></i>
+            <span>Forecaster AI</span>
+        </div>
+        <div class="tagline">
+            <i class="fa-solid fa-sparkles"></i> Polynomial Regression Engine v2.0
+        </div>
+    </header>
+
+    <main class="dashboard">
+        
+        <!-- Left Side: Predictor & Simulator -->
+        <section class="card">
+            <h2 class="card-title">
+                <i class="fa-solid fa-sliders"></i> Sales Forecasting Simulator
+            </h2>
+            
+            <div class="model-selector">
+                <button class="model-btn active" id="btnLinear">Linear Regression</button>
+                <button class="model-btn" id="btnPoly">Polynomial Regression (Deg 2)</button>
+            </div>
+
+            <!-- TV Slider -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-name">
+                        <span class="dot tv-dot"></span>
+                        TV Advertising Budget
+                    </span>
+                    <span class="slider-val" id="tvVal">$150.0k</span>
+                </div>
+                <input type="range" id="tvBudget" min="0" max="300" step="0.5" value="150">
+            </div>
+
+            <!-- Radio Slider -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-name">
+                        <span class="dot radio-dot"></span>
+                        Radio Advertising Budget
+                    </span>
+                    <span class="slider-val" id="radioVal">$25.0k</span>
+                </div>
+                <input type="range" id="radioBudget" min="0" max="50" step="0.5" value="25">
+            </div>
+
+            <!-- Newspaper Slider -->
+            <div class="slider-group">
+                <div class="slider-header">
+                    <span class="slider-name">
+                        <span class="dot newspaper-dot"></span>
+                        Newspaper Advertising Budget
+                    </span>
+                    <span class="slider-val" id="newspaperVal">$30.0k</span>
+                </div>
+                <input type="range" id="newspaperBudget" min="0" max="100" step="0.5" value="30">
+            </div>
+
+            <div class="prediction-panel">
+                <div class="prediction-label">Estimated Sales Prediction</div>
+                <div class="prediction-value" id="predictionOutput">14.85</div>
+                <div class="prediction-unit">thousand units sold</div>
+            </div>
+            
+            <div style="margin-top: 24px; position: relative; height: 180px; width: 100%;">
+                <canvas id="regressionCurveChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Right Side: AI Budget Recommender & Purchase Power -->
+        <section class="card">
+            <h2 class="card-title">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> AI Allocation Advisor
+            </h2>
+            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 20px;">
+                Enter your total available budget (in thousands) and let the AI find the optimal allocation or check what you can buy.
+            </p>
+
+            <div class="allocation-input-box">
+                <input type="number" id="totalBudgetInput" placeholder="Enter budget (e.g. 150)" value="150" min="0">
+                <button class="btn-optimize" id="btnOptimize">Analyze</button>
+            </div>
+
+            <!-- Allocation Chart -->
+            <div style="margin-top: 20px; margin-bottom: 50px; display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 16px; height: 220px; clear: both;">
+                <div style="position: relative; height: 100%; width: 100%;">
+                    <canvas id="salesGrowthChart"></canvas>
+                </div>
+                <div style="position: relative; height: 100%; width: 100%;">
+                    <canvas id="allocationPieChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Shopping Power (Affordability Grid) -->
+            <div class="affordability-grid">
+                <div class="item-card" id="item-newspaper">
+                    <span class="item-icon">📰</span>
+                    <div class="item-name">Newspaper</div>
+                    <div class="item-price">$0.005k</div>
+                </div>
+                <div class="item-card" id="item-radio">
+                    <span class="item-icon">📻</span>
+                    <div class="item-name">Radio</div>
+                    <div class="item-price">$0.05k</div>
+                </div>
+                <div class="item-card" id="item-phone">
+                    <span class="item-icon">📱</span>
+                    <div class="item-name">Smart Phone</div>
+                    <div class="item-price">$0.8k</div>
+                </div>
+                <div class="item-card" id="item-tv">
+                    <span class="item-icon">📺</span>
+                    <div class="item-name">Smart TV</div>
+                    <div class="item-price">$1.5k</div>
+                </div>
+                <div class="item-card" id="item-laptop">
+                    <span class="item-icon">💻</span>
+                    <div class="item-name">Laptop</div>
+                    <div class="item-price">$2.5k</div>
+                </div>
+            </div>
+
+            <!-- AI Advisor Panel -->
+            <div class="ai-advisor-container">
+                <div class="ai-header">
+                    <div class="ai-avatar">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <span>AI Assistant Recommendation</span>
+                </div>
+                <div class="ai-message" id="aiMessage">
+                    Click "Analyze" to see my optimal budget recommendation and purchase capabilities.
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>Built with Polynomial Regression model. Fit using Advertising Sales dataset. © 2026 Forecaster AI</p>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="regression.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
