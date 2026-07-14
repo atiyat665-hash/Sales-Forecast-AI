@@ -141,72 +141,83 @@ btnPoly.addEventListener('click', () => {
 let curveChart = null;
 
 function initCurveChart() {
-    const ctx = document.getElementById('regressionCurveChart').getContext('2d');
-    curveChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Regression Curve (TV vs Sales)',
-                data: [],
-                borderColor: '#06b6d4',
-                backgroundColor: 'rgba(6, 182, 212, 0.05)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3,
-                pointRadius: 0
-            }, {
-                label: 'Current Input Point',
-                data: [],
-                borderColor: '#f43f5e',
-                backgroundColor: '#f43f5e',
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                showLine: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
+    try {
+        if (typeof Chart === 'undefined') return;
+        const ctx = document.getElementById('regressionCurveChart');
+        if (!ctx) return;
+        
+        curveChart = new Chart(ctx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Regression Curve (TV vs Sales)',
+                    data: [],
+                    borderColor: '#06b6d4',
+                    backgroundColor: 'rgba(6, 182, 212, 0.05)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 0
+                }, {
+                    label: 'Current Input Point',
+                    data: [],
+                    borderColor: '#f43f5e',
+                    backgroundColor: '#f43f5e',
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    showLine: false
+                }]
             },
-            scales: {
-                x: {
-                    type: 'linear',
-                    min: 0,
-                    max: 300,
-                    grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                    ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 10 } },
-                    title: { display: true, text: 'TV Budget ($k)', color: '#94a3b8', font: { family: 'Outfit', size: 11 } }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
                 },
-                y: {
-                    min: 0,
-                    max: 30,
-                    grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                    ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 10 } },
-                    title: { display: true, text: 'Sales (k units)', color: '#94a3b8', font: { family: 'Outfit', size: 11 } }
+                scales: {
+                    x: {
+                        type: 'linear',
+                        min: 0,
+                        max: 300,
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 10 } },
+                        title: { display: true, text: 'TV Budget ($k)', color: '#94a3b8', font: { family: 'Outfit', size: 11 } }
+                    },
+                    y: {
+                        min: 0,
+                        max: 30,
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 10 } },
+                        title: { display: true, text: 'Sales (k units)', color: '#94a3b8', font: { family: 'Outfit', size: 11 } }
+                    }
                 }
             }
-        }
-    });
+        });
+    } catch (err) {
+        console.error("Error initializing curve chart:", err);
+    }
 }
 
 function updateCurveChart(activeTv, activeRadio, activeNewspaper, predictedSales) {
-    if (!curveChart) return;
-    
-    // Generate 20 points along the TV axis
-    const curvePoints = [];
-    for (let tv = 0; tv <= 300; tv += 15) {
-        const sales = currentModel.predict([[tv, activeRadio, activeNewspaper]])[0];
-        curvePoints.push({ x: tv, y: Math.max(0, sales) });
+    try {
+        if (!curveChart || typeof Chart === 'undefined') return;
+        
+        // Generate 20 points along the TV axis
+        const curvePoints = [];
+        for (let tv = 0; tv <= 300; tv += 15) {
+            const sales = currentModel.predict([[tv, activeRadio, activeNewspaper]])[0];
+            curvePoints.push({ x: tv, y: Math.max(0, sales) });
+        }
+        
+        curveChart.data.datasets[0].data = curvePoints;
+        curveChart.data.datasets[1].data = [{ x: activeTv, y: predictedSales }];
+        curveChart.update('none'); // Quick update without layout redraw
+    } catch (err) {
+        console.error("Error updating curve chart:", err);
     }
-    
-    curveChart.data.datasets[0].data = curvePoints;
-    curveChart.data.datasets[1].data = [{ x: activeTv, y: predictedSales }];
-    curveChart.update('none'); // Quick update without layout redraw
 }
 
 // Global variables for AI Allocation Charts
@@ -214,66 +225,75 @@ let salesGrowthChart = null;
 let allocationPieChart = null;
 
 function initAllocationCharts() {
-    const ctxLine = document.getElementById('salesGrowthChart').getContext('2d');
-    salesGrowthChart = new Chart(ctxLine, {
-        type: 'line',
-        data: {
-            labels: [],
-            datasets: [{
-                label: 'Expected Sales Growth',
-                data: [],
-                borderColor: '#a855f7',
-                backgroundColor: 'rgba(168, 85, 247, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.3,
-                pointRadius: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                x: {
-                    type: 'linear',
-                    grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                    ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 9 } },
-                    title: { display: true, text: 'Budget ($k)', color: '#94a3b8', font: { family: 'Outfit', size: 10 } }
-                },
-                y: {
-                    grid: { color: 'rgba(255, 255, 255, 0.04)' },
-                    ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 9 } },
-                    title: { display: true, text: 'Sales (k)', color: '#94a3b8', font: { family: 'Outfit', size: 10 } }
+    try {
+        if (typeof Chart === 'undefined') return;
+        const ctxLine = document.getElementById('salesGrowthChart');
+        if (!ctxLine) return;
+        
+        salesGrowthChart = new Chart(ctxLine.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Expected Sales Growth',
+                    data: [],
+                    borderColor: '#a855f7',
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        type: 'linear',
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 9 } },
+                        title: { display: true, text: 'Budget ($k)', color: '#94a3b8', font: { family: 'Outfit', size: 10 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: { color: '#94a3b8', font: { family: 'Outfit', size: 9 } },
+                        title: { display: true, text: 'Sales (k)', color: '#94a3b8', font: { family: 'Outfit', size: 10 } }
+                    }
                 }
             }
-        }
-    });
+        });
 
-    const ctxPie = document.getElementById('allocationPieChart').getContext('2d');
-    allocationPieChart = new Chart(ctxPie, {
-        type: 'doughnut',
-        data: {
-            labels: ['TV', 'Radio', 'News'],
-            datasets: [{
-                data: [0, 0, 0],
-                backgroundColor: ['#f43f5e', '#06b6d4', '#eab308'],
-                borderColor: '#121420',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom',
-                    labels: { color: '#94a3b8', boxWidth: 10, font: { family: 'Outfit', size: 10 } }
-                }
+        const ctxPie = document.getElementById('allocationPieChart');
+        if (!ctxPie) return;
+        
+        allocationPieChart = new Chart(ctxPie.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['TV', 'Radio', 'News'],
+                datasets: [{
+                    data: [0, 0, 0],
+                    backgroundColor: ['#f43f5e', '#06b6d4', '#eab308'],
+                    borderColor: '#121420',
+                    borderWidth: 2
+                }]
             },
-            cutout: '60%'
-        }
-    });
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#94a3b8', boxWidth: 10, font: { family: 'Outfit', size: 10 } }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    } catch (err) {
+        console.error("Error initializing allocation charts:", err);
+    }
 }
 
 // Run optimization and update recommendation
@@ -335,38 +355,46 @@ function runBudgetAnalysis() {
     const [optTv, optRadio, optNews] = bestAllocation;
 
     // Update Doughnut Chart with the optimal percentages
-    if (allocationPieChart) {
-        allocationPieChart.data.datasets[0].data = [optTv, optRadio, optNews];
-        allocationPieChart.update();
+    try {
+        if (allocationPieChart && typeof Chart !== 'undefined') {
+            allocationPieChart.data.datasets[0].data = [optTv, optRadio, optNews];
+            allocationPieChart.update();
+        }
+    } catch (err) {
+        console.error("Error updating allocation pie chart:", err);
     }
 
     // Generate Growth Line points (Expected Sales vs Budget up to totalBudget)
-    if (salesGrowthChart && totalBudget > 0) {
-        const growthPoints = [];
-        const stepCount = 10;
-        const budgetStep = totalBudget / stepCount;
+    try {
+        if (salesGrowthChart && totalBudget > 0 && typeof Chart !== 'undefined') {
+            const growthPoints = [];
+            const stepCount = 10;
+            const budgetStep = totalBudget / stepCount;
 
-        for (let b = 0; b <= totalBudget; b += budgetStep) {
-            let maxSalesForB = -Infinity;
-            const subStep = Math.max(1, b / 10);
-            for (let tv = 0; tv <= b; tv += subStep) {
-                for (let radio = 0; radio <= b - tv; radio += subStep) {
-                    const news = Math.max(0, b - tv - radio);
-                    const sales = polyModel.predict([[tv, radio, news]])[0];
-                    if (sales > maxSalesForB) {
-                        maxSalesForB = sales;
+            for (let b = 0; b <= totalBudget; b += budgetStep) {
+                let maxSalesForB = -Infinity;
+                const subStep = Math.max(1, b / 10);
+                for (let tv = 0; tv <= b; tv += subStep) {
+                    for (let radio = 0; radio <= b - tv; radio += subStep) {
+                        const news = Math.max(0, b - tv - radio);
+                        const sales = polyModel.predict([[tv, radio, news]])[0];
+                        if (sales > maxSalesForB) {
+                            maxSalesForB = sales;
+                        }
                     }
                 }
+                growthPoints.push({ x: b, y: Math.max(0, maxSalesForB) });
             }
-            growthPoints.push({ x: b, y: Math.max(0, maxSalesForB) });
-        }
 
-        salesGrowthChart.data.datasets[0].data = growthPoints;
-        salesGrowthChart.options.scales.x.max = totalBudget;
-        salesGrowthChart.update();
-    } else if (salesGrowthChart) {
-        salesGrowthChart.data.datasets[0].data = [];
-        salesGrowthChart.update();
+            salesGrowthChart.data.datasets[0].data = growthPoints;
+            salesGrowthChart.options.scales.x.max = totalBudget;
+            salesGrowthChart.update();
+        } else if (salesGrowthChart && typeof Chart !== 'undefined') {
+            salesGrowthChart.data.datasets[0].data = [];
+            salesGrowthChart.update();
+        }
+    } catch (err) {
+        console.error("Error updating sales growth chart:", err);
     }
 
     // 3. Build Roman Urdu AI Message for the user
