@@ -1,6 +1,7 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import os
+import re
 
 # Set page configuration to wide and dark
 st.set_page_config(
@@ -24,8 +25,9 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 
 def load_inline_html(filename):
     """
-    Reads index.html and injects style.css, regression.js, and app.js inline using simple, 
-    unambiguous string replacement to guarantee it works in Streamlit's sandboxed environment.
+    Reads index.html and injects style.css, regression.js, and app.js inline.
+    To be 100% safe from whitespace and quote variations, we strip the original 
+    external script tags and append the code directly at the end of the body.
     """
     if not os.path.exists(filename):
         return f"<h1>File {filename} not found</h1>"
@@ -33,27 +35,39 @@ def load_inline_html(filename):
     with open(filename, 'r', encoding='utf-8') as f:
         html = f.read()
         
-    # Inject style.css
+    # 1. Inject style.css by replacing the link tag (using regex to ignore spacing)
     if os.path.exists("style.css"):
         with open("style.css", 'r', encoding='utf-8') as css_f:
             css_content = css_f.read()
-        # Find both versions of quotes to be 100% safe
-        html = html.replace('<link rel="stylesheet" href="style.css">', f'<style>\n{css_content}\n</style>')
-        html = html.replace("<link rel='stylesheet' href='style.css'>", f"<style>\n{css_content}\n</style>")
+        # Replace the stylesheet link tag regardless of spaces/quotes
+        html = re.sub(r'<link\s+[^>]*href=["\']style\.css["\'][^>]*>', f'<style>\n{css_content}\n</style>', html)
         
-    # Inject regression.js
+    # 2. Strip the original external script tags for regression.js and app.js to prevent 404s
+    html = re.sub(r'<script\s+[^>]*src=["\']regression\.js["\'][^>]*>\s*</script>', '', html)
+    html = re.sub(r'<script\s+[^>]*src=["\']app\.js["\'][^>]*>\s*</script>', '', html)
+    
+    # 3. Read script contents
+    regression_js = ""
     if os.path.exists("regression.js"):
         with open("regression.js", 'r', encoding='utf-8') as js_f:
-            js_content = js_f.read()
-        html = html.replace('<script src="regression.js"></script>', f'<script>\n{js_content}\n</script>')
-        html = html.replace("<script src='regression.js'></script>", f"<script>\n{js_content}\n</script>")
-        
-    # Inject app.js
+            regression_js = js_f.read()
+            
+    app_js = ""
     if os.path.exists("app.js"):
         with open("app.js", 'r', encoding='utf-8') as js_f:
-            js_content = js_f.read()
-        html = html.replace('<script src="app.js"></script>', f'<script>\n{js_content}\n</script>')
-        html = html.replace("<script src='app.js'></script>", f"<script>\n{js_content}\n</script>")
+            app_js = js_f.read()
+            
+    # 4. Inject scripts inline directly before the closing body tag
+    inline_scripts = f"""
+    <script>
+    {regression_js}
+    </script>
+    <script>
+    {app_js}
+    </script>
+    </body>
+    """
+    html = html.replace("</body>", inline_scripts)
 
     return html
 
