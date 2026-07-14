@@ -419,9 +419,17 @@ function runBudgetAnalysis() {
 
 btnOptimize.addEventListener('click', runBudgetAnalysis);
 
-// Initialize view
-initCurveChart();
-initAllocationCharts();
-updatePrediction();
-runBudgetAnalysis();
+// Export functions to global window scope to make sure SPA routing can access them
+window.updatePrediction = updatePrediction;
+window.runBudgetAnalysis = runBudgetAnalysis;
+
+// Initialize view safely
+try {
+    initCurveChart();
+    initAllocationCharts();
+    updatePrediction();
+    runBudgetAnalysis();
+} catch (err) {
+    console.error("Initialization error in app.js:", err);
+}
 
