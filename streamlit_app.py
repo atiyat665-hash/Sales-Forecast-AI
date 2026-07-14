@@ -1,7 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import os
-import re
 
 # Set page configuration to wide and dark
 st.set_page_config(
@@ -25,8 +24,8 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 
 def load_inline_html(filename):
     """
-    Reads index.html and injects style.css, regression.js, and app.js inline
-    so the entire SPA works inside Streamlit's iframe.
+    Reads index.html and injects style.css, regression.js, and app.js inline using simple, 
+    unambiguous string replacement to guarantee it works in Streamlit's sandboxed environment.
     """
     if not os.path.exists(filename):
         return f"<h1>File {filename} not found</h1>"
@@ -38,31 +37,23 @@ def load_inline_html(filename):
     if os.path.exists("style.css"):
         with open("style.css", 'r', encoding='utf-8') as css_f:
             css_content = css_f.read()
-        html = re.sub(
-            r'<link[^>]*href=["\']style\.css["\'][^>]*>',
-            f'<style>\n{css_content}\n</style>',
-            html
-        )
+        # Find both versions of quotes to be 100% safe
+        html = html.replace('<link rel="stylesheet" href="style.css">', f'<style>\n{css_content}\n</style>')
+        html = html.replace("<link rel='stylesheet' href='style.css'>", f"<style>\n{css_content}\n</style>")
         
     # Inject regression.js
     if os.path.exists("regression.js"):
         with open("regression.js", 'r', encoding='utf-8') as js_f:
             js_content = js_f.read()
-        html = re.sub(
-            r'<script[^>]*src=["\']regression\.js["\'][^>]*>\s*</script>',
-            f'<script>\n{js_content}\n</script>',
-            html
-        )
+        html = html.replace('<script src="regression.js"></script>', f'<script>\n{js_content}\n</script>')
+        html = html.replace("<script src='regression.js'></script>", f"<script>\n{js_content}\n</script>")
         
     # Inject app.js
     if os.path.exists("app.js"):
         with open("app.js", 'r', encoding='utf-8') as js_f:
             js_content = js_f.read()
-        html = re.sub(
-            r'<script[^>]*src=["\']app\.js["\'][^>]*>\s*</script>',
-            f'<script>\n{js_content}\n</script>',
-            html
-        )
+        html = html.replace('<script src="app.js"></script>', f'<script>\n{js_content}\n</script>')
+        html = html.replace("<script src='app.js'></script>", f"<script>\n{js_content}\n</script>")
 
     return html
 
